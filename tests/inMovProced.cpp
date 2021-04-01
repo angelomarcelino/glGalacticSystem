@@ -10,22 +10,22 @@
 using namespace std;
 
 static int dots[100][2];
-static double gxOff[3] = {0,0,0};
+static double gxOff[3] = {0, 0, 0};
 static int year = 0;
 
 class StarSystem {
    public:
 	StarSystem(uint32_t x, uint32_t y, uint32_t z, double nSec, double secSize) {
-		nLehmer = (z & 0xFFFF) << 16 | (y & 0xFFFF) << 8 | (x & 0xFFFF) ;
+		nLehmer = (z & 0xFFFF) << 16 | (y & 0xFFFF) << 8 | (x & 0xFFFF);
 
 		starExists = (rndInt(0, 100) == 1);
 		if (!starExists) return;
 
-		starRadius = rndDouble(0.03, secSize/5);
+		starRadius = rndDouble(0.03, secSize / 5);
 
 		for (int i = 0; i < 3; i++) {
 			int sig = (rndInt(1, 2) == 1) ? 1 : -1;
-			starOffset[i] = sig * rndDouble(0.01, secSize/8);
+			starOffset[i] = sig * rndDouble(0.01, secSize / 8);
 		}
 
 		starCoord[0] = ((x - nSec / 2) * secSize) + starOffset[0];
@@ -117,14 +117,14 @@ void display(void) {
 	}
 	glPopMatrix();
 
-	glTranslatef(gxOff[0], 0.0, gxOff[2]);	// Movement Matrix
+	//glTranslatef(gxOff[0], 0.0, gxOff[2]);	// Movement Matrix
 	glRotatef((GLfloat)year, 0.0, 1.0, 0.0);
 	glColor3f(1.0, 1.0, 0.0);
 
 	glPushMatrix();
 	{  // Procedural stars
-		double secSize = 0.5;
-		double secLim = 10;
+		double secSize = 0.3;
+		double secLim = 3;
 		int nSector = (secLim / secSize);
 
 		int xyz[3] = {0, 0, 0};
@@ -132,18 +132,22 @@ void display(void) {
 		for (int x = 0; x < nSector; x++)
 			for (int y = 0; y < nSector; y++)
 				for (int z = 0; z < nSector; z++) {
-
-					StarSystem SysSector(x, y, z, nSector, secSize);
+					StarSystem SysSector(x + gxOff[0],
+										 y + gxOff[1],
+										 z + gxOff[2], nSector, secSize);
 
 					if (SysSector.starExists) {
-                        glPushMatrix();
-						glTranslatef((x - nSector / 2) * secSize, 
-                        (y - nSector / 2) * secSize, 
-                        (z - nSector / 2) * secSize);
+						glPushMatrix();
+						glTranslatef((x + gxOff[0] - nSector / 2) * secSize,
+									 (y + gxOff[1] - nSector / 2) * secSize,
+									 (z + gxOff[2] - nSector / 2) * secSize);
 						glutWireCube(secSize);
 						glPopMatrix();
 						glPushMatrix();
 						// translate star
+						cout << SysSector.starCoord[0] << " " << 
+                        SysSector.starCoord[1] << " " << 
+                        SysSector.starCoord[2] << endl;
 						glTranslatef(SysSector.starCoord[0], SysSector.starCoord[1], SysSector.starCoord[2]);
 						// draw star
 						glutSolidSphere(SysSector.starRadius, 20, 16);
@@ -174,19 +178,19 @@ void reshape(int w, int h) {
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		case 'd':
-			gxOff[0] += 0.1;
+			gxOff[0] += 1;
 			glutPostRedisplay();
 			break;
 		case 'a':
-			gxOff[0] -= 0.1;
+			gxOff[0] -= 1;
 			glutPostRedisplay();
 			break;
 		case 'w':
-			gxOff[2] += 0.1;
+			gxOff[2] += 1;
 			glutPostRedisplay();
 			break;
 		case 's':
-			gxOff[2] += -0.1;
+			gxOff[2] += -1;
 			glutPostRedisplay();
 			break;
 		case 'y':

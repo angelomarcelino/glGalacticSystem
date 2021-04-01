@@ -1,4 +1,5 @@
 #include <iostream>
+#include <bitset>
 
 using namespace std;
 
@@ -22,12 +23,29 @@ double rndDouble(double min, double max) {
 
 int main() {
 	int lim = (3 / 1);
-	for (int x = 0; x <= lim; x++) 
-		for (int y = 0; y <= lim; y++) 
+	for (int x = 0; x <= lim; x++) {
+		for (int y = 0; y <= lim; y++) {
 			for (int z = 0; z <= lim; z++) {
-				int nLehmer = (z & 0xFFFF) << 16 | (y & 0xFFFF) << 16 | (x & 0xFFFF);
+				int nLehmer = (z & 0xFFFF) << 16 | ((y & 0xFFFF) | (x & 0xFFFF));
 
-				cout << nLehmer << endl;
+				cout << "(" << nLehmer << ", " << (rndInt(0, 5) == 1) << ")" << " ";
 			}
+			cout << "y" << " ";
+		}
+		cout << endl;
+	}
 
+	for (int x = 0; x < 3; x++) {
+		for (int y = 0; y < 3; y++) {
+			for (int z = 0; z < 3; z++){
+				int nLehmer = (z & 0xFFFF) << 20 | (y & 0xFFFF) << 10 | (x & 0xFFFF);
+				bitset<32> az(z), bz((z & 0xFFFF) << 20), ay(y), by((y & 0xFFFF) << 10), ax(x), bx(x & 0xFFFF), c(nLehmer);
+
+				//cout << az << " | " << ay << " | " << ax << endl << bz << " | " << by << " | " << bx << " ---> " << c << endl;
+				cout << nLehmer << endl;
+            }
+			cout << "y" << endl;
+		}
+		cout << endl;
+	}
 }
