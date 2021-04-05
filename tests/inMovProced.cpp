@@ -10,7 +10,7 @@
 using namespace std;
 
 static int dots[100][2];
-static double gxOff[3] = {0, 0, 0};
+static int gxOff[3] = {0, 0, 0};
 static int year = 0;
 
 class StarSystem {
@@ -28,9 +28,11 @@ class StarSystem {
 			starOffset[i] = sig * rndDouble(0.01, secSize / 8);
 		}
 
-		starCoord[0] = ((x - nSec / 2) * secSize) + starOffset[0];
-		starCoord[1] = ((y - nSec / 2) * secSize) + starOffset[1];
-		starCoord[2] = ((z - nSec / 2) * secSize) + starOffset[2];
+		starCoord[0] = (((int)x - nSec / 2) * secSize) + starOffset[0];
+		starCoord[1] = (((int)y - nSec / 2) * secSize) + starOffset[1];
+		starCoord[2] = (((int)z - nSec / 2) * secSize) + starOffset[2];
+		//cout << starCoord[0] << " " << starCoord[1] << " " << starCoord[2] << endl;
+		//cout << (int)z << " ";
 	}
 
    public:
@@ -145,9 +147,6 @@ void display(void) {
 						glPopMatrix();
 						glPushMatrix();
 						// translate star
-						cout << SysSector.starCoord[0] << " " << 
-                        SysSector.starCoord[1] << " " << 
-                        SysSector.starCoord[2] << endl;
 						glTranslatef(SysSector.starCoord[0], SysSector.starCoord[1], SysSector.starCoord[2]);
 						// draw star
 						glutSolidSphere(SysSector.starRadius, 20, 16);
@@ -155,6 +154,7 @@ void display(void) {
 					}
 				}
 	}
+
 	glPopMatrix();
 
 	glColor3f(1.0, 1.0, 1.0);
