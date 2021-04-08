@@ -7,59 +7,14 @@
 #include <time.h>
 
 #include <iostream>
+
+#include "../include/StarSystem.h"
+
 using namespace std;
 
 static int dots[100][2];
 static int gxOff[3] = {0, 0, 0};
 static int year = 0;
-
-class StarSystem {
-   public:
-	StarSystem(uint32_t x, uint32_t y, uint32_t z, double nSec, double secSize) {
-		nLehmer = (z & 0xFFFF) << 16 | (y & 0xFFFF) << 8 | (x & 0xFFFF);
-
-		starExists = (rndInt(0, 100) == 1);
-		if (!starExists) return;
-
-		starRadius = rndDouble(0.03, secSize / 5);
-
-		for (int i = 0; i < 3; i++) {
-			int sig = (rndInt(1, 2) == 1) ? 1 : -1;
-			starOffset[i] = sig * rndDouble(0.01, secSize / 8);
-		}
-
-		starCoord[0] = (((int)x - nSec / 2) * secSize) + starOffset[0];
-		starCoord[1] = (((int)y - nSec / 2) * secSize) + starOffset[1];
-		starCoord[2] = (((int)z - nSec / 2) * secSize) + starOffset[2];
-		//cout << starCoord[0] << " " << starCoord[1] << " " << starCoord[2] << endl;
-		//cout << (int)z << " ";
-	}
-
-   public:
-	bool starExists = false;
-	double starRadius = 0.0;
-	double starCoord[3] = {0.0, 0.0, 0.0};
-	double starOffset[3] = {0.0, 0.0, 0.0};
-
-   private:
-	uint32_t nLehmer = 0;
-	uint32_t Lehmer32() {
-		nLehmer += 0xe120fc15;
-		uint64_t tmp;
-		tmp = (uint64_t)nLehmer * 0x4a39b70d;
-		uint32_t m1 = (tmp >> 32) ^ tmp;
-		tmp = (uint64_t)m1 * 0x12fad5c9;
-		uint32_t m2 = (tmp >> 32) ^ tmp;
-
-		return m2;
-	}
-
-	int rndInt(int min, int max) { return (Lehmer32() % (max - min)) + min; }
-
-	double rndDouble(double min, double max) {
-		return ((double)Lehmer32() / (double)(0x7FFFFFFF)) * (max - min) + min;
-	}
-};
 
 void init(void) {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -134,9 +89,7 @@ void display(void) {
 		for (int x = 0; x < nSector; x++)
 			for (int y = 0; y < nSector; y++)
 				for (int z = 0; z < nSector; z++) {
-					StarSystem SysSector(x + gxOff[0],
-										 y + gxOff[1],
-										 z + gxOff[2], nSector, secSize);
+					StarSystem SysSector(x + gxOff[0], y + gxOff[1], z + gxOff[2], nSector, secSize);
 
 					if (SysSector.starExists) {
 						glPushMatrix();

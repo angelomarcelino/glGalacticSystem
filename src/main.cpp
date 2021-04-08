@@ -6,46 +6,116 @@
 #include <stdlib.h>
 #include <time.h>
 
-static int year = 0, day = 0;
-static GLdouble planet[8], moon[8];
+#include <iostream>
 
-GLdouble double_rand(GLdouble min, GLdouble max) {
-	GLdouble scale = rand() / (GLdouble)RAND_MAX; /* [0, 1.0] */
-	return min + scale * (max - min);			  /* [min, max] */
-}
+#include "../include/StarSystem.h"
+using namespace std;
+
+static int dots[100][2];
+static int gxOff[3] = {0, 0, 0};
+static int year = 0;
 
 void init(void) {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glShadeModel(GL_FLAT);
+	glShadeModel(GL_SMOOTH);
 }
 
 void display(void) {
-	glClear(GL_COLOR_BUFFER_BIT);
+	int w = glutGet(GLUT_WINDOW_WIDTH);
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// 2D rendering
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, w, 0, h, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glPushMatrix();
+	{  // Star dots
+		glColor3f(1.0, 1.0, 1.0);
+		glPointSize(3);
+		glBegin(GL_POINTS);
+		for (int i = 1; i < 100; i++) {
+			int x = dots[i][0] % w;
+			int y = dots[i][1] % h;
+			glVertex2i(x, y);
+		}
+		glEnd();
+	}
+	glPopMatrix();
+
+	// 3D rendering
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 1.0, 20.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+	glPushMatrix();
+	{  // Axis Lines
+		glBegin(GL_LINES);
+		glColor3f(1.0, 1.0, 1.0);
+		glVertex3f(-10.0, 0.0, 0.0);
+		glVertex3f(10.0, 0.0, 0.0);
+
+		glColor3f(1.0, 1.0, 1.0);
+		glVertex3f(0.0, -10.0, 0.0);
+		glVertex3f(0.0, 10.0, 0.0);
+
+		glColor3f(1.0, 1.0, 1.0);
+		glVertex3f(0.0, 0.0, -10.0);
+		glVertex3f(0.0, 0.0, 10.0);
+		glEnd();
+	}
+	glPopMatrix();
+
+	//glTranslatef(gxOff[0], 0.0, gxOff[2]);	// Movement Matrix
+	glRotatef((GLfloat)year, 0.0, 1.0, 0.0);
 	glColor3f(1.0, 1.0, 0.0);
 
-	glPushMatrix();	 // Sun Matrix
+	glPushMatrix();
+	{  // Procedural stars
+		double secSize = 0.3;
+		double secLim = 3;
+		int nSector = (secLim / secSize);
 
-	glutSolidSphere(1.0, 20, 16);
-	glRotatef((GLfloat)year, 1.0, 1.0, 1.0);
+		int xyz[3] = {0, 0, 0};
 
-	glColor3f(1.0, 1.0, 1.0);
-	for (int i = 0; i < 3; i++) {
-		// Add planet
-		glTranslatef(2.5, 0.0, 0.0);
-		glPushMatrix();							 // Planet Matrix
-		glRotatef((GLfloat)day, 0.0, 1.0, 0.0);	 // Rotates
+		for (int x = 0; x < nSector; x++)
+			for (int y = 0; y < nSector; y++)
+				for (int z = 0; z < nSector; z++) {
+					StarSystem SysSector(x + gxOff[0],
+										 y + gxOff[1],
+										 z + gxOff[2], nSector, secSize);
 
-		glutWireSphere(planet[i], 10, 8);
-		for (int j = 0; j < 2; j++) {
-			glTranslatef(0.3, 0.0, 0.0);
-			glPushMatrix();	 // Moon Matrix
-			glutWireSphere(moon[j], 10, 8);
-			glPopMatrix();
-		}
-		glPopMatrix();
+					if (SysSector.starExists) {
+						glPushMatrix();
+						glTranslatef((x + gxOff[0] - nSector / 2) * secSize,
+									 (y + gxOff[1] - nSector / 2) * secSize,
+									 (z + gxOff[2] - nSector / 2) * secSize);
+						glutWireCube(secSize);
+						glPopMatrix();
+						glPushMatrix();
+						// translate star
+						glTranslatef(SysSector.starCoord[0], SysSector.starCoord[1], SysSector.starCoord[2]);
+						// draw star
+						glutSolidSphere(SysSector.starRadius, 20, 16);
+						glPopMatrix();
+					}
+				}
 	}
 
 	glPopMatrix();
+
+	glColor3f(1.0, 1.0, 1.0);
+	glPushMatrix();
+	glutWireCube(3.0);
+	glPopMatrix();
+
 	glutSwapBuffers();
 }
 
@@ -56,25 +126,29 @@ void reshape(int w, int h) {
 	gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 1.0, 20.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		case 'd':
-			day = (day + 10) % 360;
+			gxOff[0] += 1;
 			glutPostRedisplay();
 			break;
-		case 'D':
-			day = (day - 10) % 360;
+		case 'a':
+			gxOff[0] -= 1;
+			glutPostRedisplay();
+			break;
+		case 'w':
+			gxOff[2] += 1;
+			glutPostRedisplay();
+			break;
+		case 's':
+			gxOff[2] += -1;
 			glutPostRedisplay();
 			break;
 		case 'y':
 			year = (year + 5) % 360;
-			glutPostRedisplay();
-			break;
-		case 'Y':
-			year = (year - 5) % 360;
 			glutPostRedisplay();
 			break;
 		default:
@@ -83,17 +157,14 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 int main(int argc, char **argv) {
-	srand((unsigned int)time(NULL));
-	for (int i = 0; i < 8; i++) {
-		// Add planet
-		planet[i] = double_rand(0.1, 0.3);
-		moon[i] = double_rand(0.01, 0.1);
-		printf("%f --- %f\n", moon[i], planet[i]);
+	for (int i = 0; i < 100; i++) {
+		dots[i][0] = rand();
+		dots[i][1] = rand();
 	}
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(1200, 500);
-	glutInitWindowPosition(100, 100);
+	glutInitWindowSize(500, 500);
+	glutInitWindowPosition(200, 700);
 	glutCreateWindow(argv[0]);
 	init();
 	glutDisplayFunc(display);
