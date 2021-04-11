@@ -22,7 +22,7 @@ class StarSystem {
 	double starCoord[3] = {0.0, 0.0, 0.0};
 	double starOffset[3] = {0.0, 0.0, 0.0};
 
-	StarSystem(uint32_t x, uint32_t y, uint32_t z, double nSec, double secSize);
+	StarSystem(uint32_t i, uint32_t j, uint32_t k, double nSec, double secSize);
 };
 
 #endif	//STARSYSTEM_H

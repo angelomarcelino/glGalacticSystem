@@ -14,8 +14,8 @@ uint32_t StarSystem::Lehmer32() {
 	return m2;
 }
 
-StarSystem::StarSystem(uint32_t x, uint32_t y, uint32_t z, double nSec, double secSize) {
-	nLehmer = (z & 0xFFFF) << 16 | (y & 0xFFFF) << 8 | (x & 0xFFFF);
+StarSystem::StarSystem(uint32_t i, uint32_t j, uint32_t k, double nSec, double secSize) {
+	nLehmer = (k & 0xFFFF) << 16 | (j & 0xFFFF) << 8 | (i & 0xFFFF);
 
 	starExists = (rndInt(0, 100) == 1);
 	if (!starExists) return;
@@ -27,7 +27,12 @@ StarSystem::StarSystem(uint32_t x, uint32_t y, uint32_t z, double nSec, double s
 		starOffset[i] = sig * rndDouble(0.01, secSize / 8);
 	}
 
-	starCoord[0] = ((x - nSec / 2) * secSize) + starOffset[0];
-	starCoord[1] = ((y - nSec / 2) * secSize) + starOffset[1];
-	starCoord[2] = ((z - nSec / 2) * secSize) + starOffset[2];
+	starCoord[0] = ((i - nSec / 2) * secSize) + starOffset[0];
+	starCoord[1] = ((j - nSec / 2) * secSize) + starOffset[1];
+	starCoord[2] = ((k - nSec / 2) * secSize) + starOffset[2];
+
+    // Cor da estrela
+    // Numero de planetas (talvez criar classe de planetas)
+    // dados do planeta - tamanho - distancia - numero de luas - rotacao - translacao - cor do planeta
+    // dados das luas - tamanho - distancia - rotacao - tranlacao - cor da lua
 }

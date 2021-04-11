@@ -97,7 +97,7 @@ void display(void) {
 	gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 1.0, 20.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	gluLookAt(gxOff[0], 0.0, 5.0 + gxOff[2], 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
 	glPushMatrix();
 	{  // Axis Lines
@@ -117,14 +117,14 @@ void display(void) {
 	}
 	glPopMatrix();
 
-	glTranslatef(gxOff[0], 0.0, gxOff[2]);	// Movement Matrix
+	//glTranslatef(gxOff[0], 0.0, gxOff[2]);	// Movement Matrix
 	glRotatef((GLfloat)year, 0.0, 1.0, 0.0);
 	glColor3f(1.0, 1.0, 0.0);
 
 	glPushMatrix();
 	{  // Procedural stars
-		double secSize = 0.5;
-		double secLim = 10;
+		double secSize = 0.3;
+		double secLim = 3;
 		int nSector = (secLim / secSize);
 
 		int xyz[3] = {0, 0, 0};
