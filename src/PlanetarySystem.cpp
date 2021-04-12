@@ -70,10 +70,7 @@ void PlanetarySystem::Run() {
     for (int i = 0; i < planets.size(); i++) {
         if (planet_select[i]) {
             planets[i]->GetPositon(camera_pos);
-        } else {
-            camera_pos[0] = 0;
-            camera_pos[1] = 0;
-        }
+        } 
     }
     
     camera->Update(keys_state, camera_pos);
