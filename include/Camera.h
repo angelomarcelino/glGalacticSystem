@@ -45,25 +45,27 @@ class Vec3 {
 
 class Camera {
    public:
-	Vec3 eye,       // Position
-         center,    // Front
-         up,        // Up
-         forwardVec;// 
+	Vec3 pos,       // Eye (position of camera)
+         center,    // Center = pos + front (where the camera is looking at)
+         front,     // Front = center - pos (relative to the pos, its the direction to where the camera is looking at)
+         rightVec,  // Right = up % (pos - center) (Cross-product between up vector and direction vector)
+         up,        // Up (camera's up)
+         worldUp;
 
-	double speed;
+	double yawValue, pitchValue, speed;
 
-	inline Camera() : eye(), center(), up(), forwardVec(), speed() {}
-	Camera(Vec3 *eye, Vec3 *center, Vec3 *up, double speed) : eye(*eye), center(*center), 
-                                                            up(*up), speed(speed) {
-		forwardVec = this->center - this->eye;
-		forwardVec = forwardVec.normalize();
-	}
+	Camera(Vec3 *pos, Vec3 *center, Vec3 *up, double speed = SPEED);
 
-	void forward();
+    void forward();
 	void backward();
 	void left();
 	void right();
+	void pitch(bool dir, double speed = SPEED);
+	void yaw(bool dir, double speed = SPEED);
 
+   private:
+	double radians(double deg) { return deg * (M_PI / 180); }
+	void UpdateVectors();
+	void UpdateCenter();
 };
-
 #endif	//CAMERA_H

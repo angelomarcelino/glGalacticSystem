@@ -1,5 +1,6 @@
 #include "../include/Camera.h"
 
+/* -------- Vec3 -------- */
 // Construtor por copia
 Vec3::Vec3(const Vec3 &V) {
 	x = V.x;
@@ -25,7 +26,7 @@ void Vec3::operator=(const Vec3 &V) {
 Vec3 Vec3::normalize() const {
 	double n = norm();
 	if (n > 0) {
-		return Vec3(x/n, y/n, z/n);
+		return Vec3(x / n, y / n, z / n);
 	} else {
 		cerr << "Vetor Nulo" << endl;
 	}
@@ -76,42 +77,79 @@ Vec3 Vec3::operator%(const Vec3 &V) const {
 	return prov;
 }
 
+/* -------- Camera -------- */
+void Camera::UpdateVectors() {
+	// Update Front
+    Vec3 nFront;
+	nFront.x = cos(radians(yawValue)) * cos(radians(pitchValue));
+	nFront.y = sin(radians(pitchValue));
+	nFront.z = sin(radians(yawValue)) * cos(radians(pitchValue));
+	front = nFront.normalize();
+	// Update Right
+	rightVec = front % worldUp;
+	rightVec = rightVec.normalize();
+	// Update Up
+	up = rightVec % front;
+	up = up.normalize();
+}
+
+void Camera::UpdateCenter() {
+	center = pos + front;
+}
+
+Camera::Camera(Vec3 *pos, Vec3 *center, Vec3 *up, double speed) : pos(*pos),
+																  center(*center),
+																  up(*up),
+																  worldUp(*up),
+																  speed(speed) {
+	this->yawValue = YAW;
+	this->pitchValue = PITCH;
+	UpdateVectors();
+}
+
 // Move pra frente
 void Camera::forward() {
-	forwardVec = center - eye;
-	forwardVec = forwardVec.normalize();
-
-	eye = eye + (forwardVec * speed);
-	center = center + (forwardVec * speed);
-	return;
+	pos = pos + (front * speed);
+	UpdateCenter();
 }
 
 // Move pra trás
 void Camera::backward() {
-	forwardVec = center - eye;
-	forwardVec = forwardVec.normalize();
-
-	eye = eye - (forwardVec * speed);
-	center = center - (forwardVec * speed);
-	return;
+	pos = pos - (front * speed);
+	UpdateCenter();
 }
 
 // Move pra esquerda
 void Camera::left() {
-	Vec3 leftVec = up % forwardVec;
-	leftVec = leftVec.normalize();
-
-	eye = eye + (leftVec * speed);
-	center = center + (leftVec * speed);
-	return;
+	pos = pos - (rightVec * speed);
+	UpdateCenter();
 }
 
 // Move pra direita
 void Camera::right() {
-	Vec3 rightVec = forwardVec % up;
-	rightVec = rightVec.normalize();
+	pos = pos + (rightVec * speed);
+	UpdateCenter();
+}
 
-	eye = eye + (rightVec * speed);
-	center = center + (rightVec * speed);
-	return;
+// Pitch Up and Down
+void Camera::pitch(bool dir, double speed) {
+	if (dir) {
+		pitchValue += speed;
+		if (pitchValue > 89.0f) pitchValue = 89.0f;
+	} else {
+		pitchValue -= speed;
+		if (pitchValue < -89.0f) pitchValue = -89.0f;
+	}
+	UpdateVectors();
+	UpdateCenter();
+}
+
+void Camera::yaw(bool dir, double speed) {
+	if (dir) {
+		yawValue += speed;
+	} else {
+		yawValue -= speed;
+	}
+	UpdateVectors();
+	UpdateCenter();
 }

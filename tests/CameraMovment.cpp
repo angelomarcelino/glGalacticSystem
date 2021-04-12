@@ -7,12 +7,15 @@
 #include <time.h>
 
 #include "../include/Camera.h"
+#include "../include/StarSystem.h"
 
 #include <iostream>
 using namespace std;
 
+int offset = 0;
+
 Camera cam(
-    new Vec3(0.0, 0.0, 5.0), // Eye
+    new Vec3(0.0, 0.0, 3.0), // Eye
     new Vec3(0.0, 0.0, 0.0), // Center
     new Vec3(0.0, 1.0, 0.0), // Up
     0.3 // Movement Speed
@@ -48,11 +51,46 @@ void display(void) {
 	// 3D rendering
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(cam.eye.x, cam.eye.y, cam.eye.z,
+	gluLookAt(cam.pos.x, cam.pos.y, cam.pos.z,
 			  cam.center.x, cam.center.y, cam.center.z,
 			  cam.up.x, cam.up.y, cam.up.z);
 
 	drawAxis(3.0);
+
+	glColor3f(1.0, 1.0, 0.0);
+
+	glPushMatrix();
+	{  // Procedural stars
+		double secSize = 0.3;
+		double secLim = 20;
+		int nSector = (secLim / secSize);
+
+
+		for (int i = 0; i < nSector; i++)
+			for (int j = 0; j < nSector; j++)
+				for (int k = 0; k < nSector; k++) {
+					StarSystem SysSector(i,
+										 j,
+										 k + offset, nSector, secSize);
+
+					if (SysSector.starExists) {
+						glPushMatrix();
+						glTranslatef((i - nSector / 2) * secSize,
+									 (j - nSector / 2) * secSize,
+									 (k + offset - nSector / 2) * secSize);
+						glutWireCube(secSize);
+						glPopMatrix();
+						glPushMatrix();
+						// translate star
+						glTranslatef(SysSector.starCoord[0], SysSector.starCoord[1], SysSector.starCoord[2]);
+						// draw star
+						glutSolidSphere(SysSector.starRadius, 20, 16);
+						glPopMatrix();
+					}
+				}
+	}
+
+	glPopMatrix();
 
 	glColor3f(1.0, 1.0, 1.0);
 	glPushMatrix();
@@ -73,15 +111,29 @@ void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		case 'w':
 			cam.forward();
+			offset -= 1;
 			break;
 		case 'a':
 			cam.left();
 			break;
 		case 's':
 			cam.backward();
+			offset += 1;
 			break;
 		case 'd':
 			cam.right();
+			break;
+		case 'o':
+			cam.pitch(true, 1.0);
+			break;
+		case 'l':
+			cam.pitch(false, 1.0);
+			break;
+		case 'k':
+			cam.yaw(true, 1.0);
+			break;
+		case ';':
+			cam.yaw(false, 1.0);
 			break;
 		default:
 			break;
