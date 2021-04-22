@@ -30,22 +30,30 @@ PlanetarySystem::PlanetarySystem() {
     planet_select = new bool[planets.size()]{ false };
 
     camera = new SysCamera;
-
-    // Enable OpenGL stuff
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_DEPTH_TEST);
-
-    // glColorMaterial(GL_FRONT, GL_AMBIENT);
-    // glEnable(GL_COLOR_MATERIAL);
-    // glEnable(GL_POLYGON_SMOOTH);
 }
 
 // Class Destructor
 PlanetarySystem::~PlanetarySystem() {
     delete[] planet_select;
+}
+
+void PlanetarySystem::Init() {
+    // Enable OpenGL stuff
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
+
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_material);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialf(GL_FRONT, GL_SHININESS, 50.0);
+
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    glColorMaterial(GL_FRONT, GL_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
 }
 
 void PlanetarySystem::Run() {
@@ -56,11 +64,11 @@ void PlanetarySystem::Run() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(fov, (float)WIDTH / (float)HEIGHT, near_plane, far_plane);
+    gluPerspective(fov, (GLfloat)WIDTH / (GLfloat)HEIGHT, near_plane, far_plane);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    
+
     if (toggle_wire_frame) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     } else {
@@ -78,9 +86,9 @@ void PlanetarySystem::Run() {
     for (auto planet : planets) {
 
         if (planet->GetMass() == 0.0) {
-            // glDisable(GL_LIGHTING);
+            glDisable(GL_LIGHTING);
             planet->Update(toggle_gravity, keys_state["d"]);
-            // glEnable(GL_LIGHTING);        
+            glEnable(GL_LIGHTING);        
         }
 
         planet->Update(toggle_gravity, keys_state["d"]);
@@ -88,6 +96,7 @@ void PlanetarySystem::Run() {
 
     // Toggle the display of the world's coordinates axis
     if (keys_state["s"]) {
+        glDisable(GL_LIGHTING);
         glBegin(GL_LINES);
         glColor3f(1.0, 0.0, 0.0);
         glVertex3f(-50.0, 0.0, 0.0);
@@ -101,6 +110,7 @@ void PlanetarySystem::Run() {
         glVertex3f(0.0, 0.0, -50.0);
         glVertex3f(0.0, 0.0, 50.0); // Blue is Z
         glEnd();
+        glEnable(GL_LIGHTING);
     }
 
     glutSwapBuffers();
@@ -153,12 +163,10 @@ void PlanetarySystem::KeyboardHandler(unsigned char key) {
 
         case 'w':
             toggle_wire_frame = !toggle_wire_frame;
-            glutPostRedisplay();
             break;
 
         case 'g':
             toggle_gravity = !toggle_gravity;
-            glutPostRedisplay();
             break;
 
         case 'q':
