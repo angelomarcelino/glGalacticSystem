@@ -5,18 +5,15 @@ Planet::Planet(
     std::pair<GLdouble, GLdouble> initial_pos, 
     std::pair<GLdouble, GLdouble> initial_vel,
     GLfloat tilt, GLfloat _rotation_speed,
-    GLdouble _mass, GLfloat size, GLfloat* _color
+    GLdouble _mass, GLfloat _size, GLfloat* _color
 ) : grav_const(6.6742e-11), scaleG(10.0) {
-
-    //Create the planet spheare
-    sphere = new SolidSphere(size, 12, 24);
 
     // Set up planet variables
     radius = 0.0;
     angle = 0.0;
     grav_accel = 0.0;
     scale = 1.0;
-
+    size = _size;
     mass = _mass;
     
     x_pos_G = initial_pos.first;
@@ -106,13 +103,45 @@ void Planet::GravMath() {
 	z_pos_G -= z_vel;	
 }
 
+void Planet::AxisRotation(GLfloat theta) {
+    // Set the up vector
+    GLfloat x = 0.0f, y = 1.0f, z = 0.0f;
+
+    // Normalizing the vector
+    GLfloat n = sqrt(x * x + y * y + z * z);
+    if (n != 1) {
+        GLfloat inv_n = 1 / n;
+
+        x *= inv_n;
+        y *= inv_n;
+        z *= inv_n;
+    }
+
+    // Creates the rotation matrix using the up vector and theta
+    GLfloat rotation_mat[4][4] = {
+        { powf(x, 2) + ((powf(y, 2) + powf(z, 2)) * cosf(theta)), ((x * y) * (1.0f - cosf(theta))) - (z * sinf(theta)), ((x * z) * (1.0f - cosf(theta))) + (y * sinf(theta)), 0 },
+		{ ((x * y) * (1.0f - cosf(theta))) + (z * sinf(theta)), powf(y, 2) + ((powf(x, 2) + powf(z, 2)) * cosf(theta)), ((y * z) * (1.0f - cosf(theta))) - (x * sinf(theta)), 0 },
+		{ ((x * z) * (1.0f - cosf(theta))) - (y * sinf(theta)), ((y * z) * (1.0f - cosf(theta))) + (x * sinf(theta)), powf(z, 2) + ((powf(x, 2) + powf(y, 2)) * cosf(theta)), 0 },
+		{ 0, 0, 0, 1 }
+    };
+
+    glMultMatrixf(*rotation_mat);
+}
+
 void Planet::Render() {
-    // Draw planet
-    sphere->Draw(
-        x_pos, y_pos, z_pos,
-        x_angle, y_angle, z_angle,
-        color, theta, scale
-    );
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    glColor3f(color[0], color[1], color[2]);
+    glTranslatef(x_pos, y_pos, z_pos);
+
+    glRotatef(x_angle, 1.0, 0.0, 0.0);
+    AxisRotation(theta); // Compute rotation on planet axis
+    glScalef(scale, scale, scale); 
+
+    glutSolidSphere(size, 24, 48);
+
+    glPopMatrix();
 
     // Update the rotation value
     theta += rotation_speed;
@@ -145,12 +174,19 @@ void Planet::UpdateMoon(GLdouble x, GLdouble y, GLdouble z) {
     scale = 0.2f;
 
     // Render();
-    sphere->Draw(
-        x_pos, y_pos, z_pos,
-        x_angle, y_angle, z_angle,
-        moon_color, theta, scale
-    );
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
 
+    glColor3f(moon_color[0], moon_color[1], moon_color[2]);
+    glTranslatef(x_pos, y_pos, z_pos);
+
+    glRotatef(x_angle, 1.0, 0.0, 0.0);
+    AxisRotation(theta); // Compute rotation on planet axis
+    glScalef(scale, scale, scale); 
+
+    glutSolidSphere(size, 24, 48);
+
+    glPopMatrix();
     // Update the rotation value
     theta += 0.25 * rotation_speed;
     if (theta >= (2 * M_PI)) {
@@ -171,11 +207,13 @@ void Planet::DrawOrbit(GLdouble _x_pos, GLdouble _z_pos, bool orbit_toggle) {
         for (auto point = orbit_points.begin();  (point + 1) != orbit_points.end(); point += 1) {
             auto start = *point, end = *(point + 1);
 
+            glDisable(GL_LIGHTING);
             glBegin(GL_LINES);
             glColor3f(color[0], color[1], color[2]);
             glVertex3f(start.first, 0.0, start.second);
             glVertex3f(end.first, 0.0, end.second);
             glEnd();
+            glEnable(GL_LIGHTING);
         }    
     }
 
