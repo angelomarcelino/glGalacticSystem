@@ -10,11 +10,13 @@ void reshape(int w, int h) {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 1.0, 20.0);
+
+    gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 1.0, 100000.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+    gluLookAt(10.0, 15.0, 10.0, 0.0, 0.0, 0., 0, 1., 0);
 }
 
 void timer(int) {
@@ -29,6 +31,8 @@ int main(int argc, char **argv) {
     glutInitWindowSize(WIDTH, HEIGHT);
     glutInitWindowPosition(10, 10);
     glutCreateWindow("Planetary System");
+
+    planetary_system->Init();
 
     glutTimerFunc(REDISPLAY_INTERVAL, timer, 0);
 
