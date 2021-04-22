@@ -86,12 +86,11 @@ void SolidSphere::AxisRotation(GLfloat theta) {
 
     // Creates the rotation matrix using the up vector and theta
     GLfloat rotation_mat[4][4] = {
-        { pow(x, 2) + ((pow(y, 2) + pow(z, 2)) * cos(theta)), ((x * y) * (1.0f - cos(theta))) - (z * sin(theta)), ((x * z) * (1.0f - cos(theta))) + (y * sin(theta)), 0 },
-		{ ((x * y) * (1.0f - cos(theta))) + (z * sin(theta)), pow(y, 2) + ((pow(x, 2) + pow(z, 2)) * cos(theta)), ((y * z) * (1.0f - cos(theta))) - (x * sin(theta)), 0 },
-		{ ((x * z) * (1.0f - cos(theta))) - (y * sin(theta)), ((y * z) * (1.0f - cos(theta))) + (x * sin(theta)), pow(z, 2) + ((pow(x, 2) + pow(y, 2)) * cos(theta)), 0 },
+        { powf(x, 2) + ((powf(y, 2) + powf(z, 2)) * cosf(theta)), ((x * y) * (1.0f - cosf(theta))) - (z * sinf(theta)), ((x * z) * (1.0f - cosf(theta))) + (y * sinf(theta)), 0 },
+		{ ((x * y) * (1.0f - cosf(theta))) + (z * sinf(theta)), powf(y, 2) + ((powf(x, 2) + powf(z, 2)) * cosf(theta)), ((y * z) * (1.0f - cosf(theta))) - (x * sinf(theta)), 0 },
+		{ ((x * z) * (1.0f - cosf(theta))) - (y * sinf(theta)), ((y * z) * (1.0f - cosf(theta))) + (x * sinf(theta)), powf(z, 2) + ((powf(x, 2) + powf(y, 2)) * cosf(theta)), 0 },
 		{ 0, 0, 0, 1 }
     };
 
     glMultMatrixf(*rotation_mat);
-
 }
