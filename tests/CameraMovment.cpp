@@ -111,14 +111,14 @@ void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		case 'w':
 			cam.forward();
-			offset -= 1;
+			//offset -= 1;
 			break;
 		case 'a':
 			cam.left();
 			break;
 		case 's':
 			cam.backward();
-			offset += 1;
+			//offset += 1;
 			break;
 		case 'd':
 			cam.right();
