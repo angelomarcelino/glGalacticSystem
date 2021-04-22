@@ -78,6 +78,7 @@ Vec3 Vec3::operator%(const Vec3 &V) const {
 }
 
 /* -------- Camera -------- */
+
 void Camera::UpdateVectors() {
 	// Update Front
     Vec3 nFront;
@@ -144,6 +145,7 @@ void Camera::pitch(bool dir, double speed) {
 	UpdateCenter();
 }
 
+// Yaw Left and Right
 void Camera::yaw(bool dir, double speed) {
 	if (dir) {
 		yawValue += speed;
