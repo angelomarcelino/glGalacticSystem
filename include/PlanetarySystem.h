@@ -1,17 +1,14 @@
 #ifndef PLANETARYSYSTEM_H
 #define PLANETARYSYSTEM_H
 
-#include <GL/glut.h>
-
 #include "SysCamera.h"
 #include "Planet.h"
 
 #include <iostream>
 #include <map>
 
-// Window globals
-#define WIDTH		1280
-#define HEIGHT		720
+#define WIDTH  1280
+#define HEIGHT 720
 
 class PlanetarySystem {
     private:
@@ -48,10 +45,27 @@ class PlanetarySystem {
         GLfloat far_plane = 100000.0f;
         GLfloat near_plane = 1.0f;
 
+        uint32_t random_seed;
+
+        // Background dots
+        int bg_dots[100][2];
+
         void CheckControls();
+        
+        // Random Number Generatior
+        uint32_t Lehmer32();
+	    int RandInt(int min, int max);
+	    double RandDouble(double min, double max);
+        
+        int RandSign();
+        GLfloat* RndColor();
+        GLfloat* RndStarColor();
+
+        // Background Stars
+        void DrawStarDots();
 
     public:
-        PlanetarySystem();
+        PlanetarySystem(uint32_t _random_seed);
         ~PlanetarySystem();
 
         void Init();
