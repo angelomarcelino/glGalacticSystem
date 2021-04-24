@@ -3,10 +3,14 @@
 #include <iostream>
 
 // Class Constructor
-SysCamera::SysCamera() {
-    x_pos = 20.0f;
-    y_pos = 25.0f;
-    z_pos = 20.0f;
+SysCamera::SysCamera(GLfloat initial_pos[3]) {
+    initial_x = initial_pos[0];
+    initial_y = initial_pos[1];
+    initial_z = initial_pos[2];
+
+    x_pos = initial_x;
+    y_pos = initial_y;
+    z_pos = initial_z;
 
     x_rot = -90.0f;
     y_rot = 0.0f;
@@ -47,7 +51,6 @@ void SysCamera::Update(std::map<std::string, bool> &keys_state, GLdouble* camera
         z_lookat = camera_pos[1];
 
         y_pos = 4.0f;
-
     } else if (keys_state["Up"] and y_pos > 0) {  // Otherwise update the camera from button pressed
         y_pos -= camera_speed;
     } else if (keys_state["Down"] ) {
@@ -62,6 +65,9 @@ void SysCamera::Update(std::map<std::string, bool> &keys_state, GLdouble* camera
         x_pos -= camera_speed;
     }
 
+    // Update camera
+    gluLookAt(x_pos, y_pos, z_pos, x_lookat, y_lookat, z_lookat, 0.0f, 1.0f, 0.0f);
+    
     // Reset keys pressed
     keys_state["Up"] = false;
     keys_state["Down"] = false;
@@ -69,24 +75,19 @@ void SysCamera::Update(std::map<std::string, bool> &keys_state, GLdouble* camera
     keys_state["Right"] = false;
     keys_state["q"] = false;
     keys_state["e"] = false;
-
-    // std::cout << "Camera positon: (" << x_pos << ", " << y_pos << ", " << z_pos << ")\n";
-
-    // Update camera
-    gluLookAt(x_pos, y_pos, z_pos, x_lookat, y_lookat, z_lookat, 0.0f, 1.0f, 0.0f);
 }
 
 void SysCamera::CameraReset() {
-    x_pos = 20.0f;
-    y_pos = 25.0f;
-    z_pos = 20.0f;
+    x_pos = initial_x;
+    y_pos = initial_y;
+    z_pos = initial_z;
 
     x_rot = -90.0f;
     y_rot = 0.0f;
     angle = 0.0f;
 
     radius = 10.0f;
-    camera_speed = 3.0f;
+    camera_speed = 1.0f;
 
     x_lookat = 0.0f;
     y_lookat = 0.0f;

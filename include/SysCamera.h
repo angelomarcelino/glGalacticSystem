@@ -9,6 +9,7 @@
 
 class SysCamera {
     private:
+        GLfloat initial_x, initial_y, initial_z;
         GLfloat x_pos, y_pos, z_pos;
         GLfloat x_rot, y_rot, angle;
         GLfloat camera_speed;
@@ -20,7 +21,7 @@ class SysCamera {
         bool camera_lock;
 
     public:
-        SysCamera();
+        SysCamera(GLfloat initial_pos[3]);
         ~SysCamera();
 
         void Update(std::map<std::string, bool> &keys_state, GLdouble* planet_position);
