@@ -3,7 +3,7 @@
 #define FPS 30
 #define REDISPLAY_INTERVAL 1000 / FPS
 
-PlanetarySystem *planetary_system = new PlanetarySystem;
+PlanetarySystem *planetary_system = new PlanetarySystem(42);
 
 void reshape(int w, int h) {
     glViewport(0, 0, (GLsizei)w, (GLsizei)h);
@@ -44,5 +44,6 @@ int main(int argc, char **argv) {
 
     glutMainLoop();
 
+    delete planetary_system;
     return 0;
 }
