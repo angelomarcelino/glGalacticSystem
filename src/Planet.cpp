@@ -195,13 +195,8 @@ void Planet::UpdateMoon(GLdouble x, GLdouble y, GLdouble z) {
 }
 
 void Planet::DrawOrbit(GLdouble _x_pos, GLdouble _z_pos, bool orbit_toggle) {
-    last_insertion += 1;
 
-    if (orbit_points.size() == 0 or last_insertion > orbit_increment) {
-        orbit_points.push_back({_x_pos, _z_pos});
-
-        last_insertion = 0;
-    }
+    orbit_points.push_back({_x_pos, _z_pos});
 
     if (orbit_points.size() > 2 and orbit_toggle) {
         for (auto point = orbit_points.begin();  (point + 1) != orbit_points.end(); point += 1) {

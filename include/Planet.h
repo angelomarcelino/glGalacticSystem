@@ -38,8 +38,6 @@ class Planet {
 
         // Orbit line variables
         std::vector<std::pair<GLdouble, GLdouble>> orbit_points;
-        int last_insertion = 0;
-        int orbit_increment = 2;
 
         void GravMath();
         void Render();
