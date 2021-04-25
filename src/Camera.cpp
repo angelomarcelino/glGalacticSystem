@@ -8,7 +8,7 @@ Vec3::Vec3(const Vec3 &V) {
 	z = V.z;
 }
 
-// Construtor especifico a partir de um inteiro (dimensao do vetor)
+// Construtor especifico a partir de valores
 Vec3::Vec3(double x, double y, double z) {
 	this->x = x;
 	this->y = y;
@@ -30,6 +30,12 @@ Vec3 Vec3::normalize() const {
 	} else {
 		cerr << "Vetor Nulo" << endl;
 	}
+}
+
+/// Impressao de um vetor
+ostream &operator<<(ostream &X, const Vec3 &V) {
+	X << '[' << V.x << ';' << V.y << ';' << V.z << ']';
+	return X;
 }
 
 // Soma de vetores
@@ -68,6 +74,15 @@ Vec3 Vec3::operator*(const double num) const {
 	return prov;
 }
 
+// divisor por escalar (utilizando o /)
+Vec3 Vec3::operator/(const double num) const {
+	double x1 = x / num;
+	double y1 = y / num;
+	double z1 = z / num;
+	Vec3 prov(x1, y1, z1);
+	return prov;
+}
+
 // Produto vetorial (utilizando o %)
 Vec3 Vec3::operator%(const Vec3 &V) const {
 	double x1 = y * V.z - z * V.y;
@@ -81,7 +96,7 @@ Vec3 Vec3::operator%(const Vec3 &V) const {
 
 void Camera::UpdateVectors() {
 	// Update Front
-    Vec3 nFront;
+	Vec3 nFront;
 	nFront.x = cos(radians(yawValue)) * cos(radians(pitchValue));
 	nFront.y = sin(radians(pitchValue));
 	nFront.z = sin(radians(yawValue)) * cos(radians(pitchValue));
@@ -96,6 +111,11 @@ void Camera::UpdateVectors() {
 
 void Camera::UpdateCenter() {
 	center = pos + front;
+	offset = (center + (front / speed)) / speed;
+	offset.x = (int)offset.x;
+	offset.y = (int)offset.y;
+	offset.z = (int)offset.z;
+	//cout << offset << endl;
 }
 
 Camera::Camera(Vec3 *pos, Vec3 *center, Vec3 *up, double speed) : pos(*pos),
