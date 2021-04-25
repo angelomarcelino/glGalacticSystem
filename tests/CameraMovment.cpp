@@ -149,6 +149,10 @@ void keyboard(unsigned char key, int x, int y) {
 	glutPostRedisplay();
 }
 
+void onMouse(int button, int state, int x, int y) {
+	
+}
+
 int main(int argc, char **argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -159,6 +163,7 @@ int main(int argc, char **argv) {
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
+	glutMouseFunc(onMouse);
 	glutMainLoop();
 	return 0;
 }

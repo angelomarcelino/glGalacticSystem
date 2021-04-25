@@ -29,6 +29,7 @@ class StarSystem {
 
 	StarSystem(uint32_t i, uint32_t j, uint32_t k, double nSec, double secSize);
 	//~StarSystem();
+	uint32_t getLehmer() { return nLehmer; }
 };
 
 #endif	//STARSYSTEM_H
