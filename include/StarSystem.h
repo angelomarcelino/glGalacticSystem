@@ -1,8 +1,12 @@
 #ifndef STARSYSTEM_H
 #define STARSYSTEM_H
 
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 #include <iostream>
 using namespace std;
+
 
 class StarSystem {
    private:
@@ -17,12 +21,14 @@ class StarSystem {
 	}
 
    public:
-		bool starExists = false;
+	bool starExists = false;
 	double starRadius = 0.0;
 	//double starCoord[3] = {0.0, 0.0, 0.0};
 	double starOffset[3] = {0.0, 0.0, 0.0};
+	float starColor[3] = {0.0, 0.0, 0.0};
 
 	StarSystem(uint32_t i, uint32_t j, uint32_t k, double nSec, double secSize);
+	//~StarSystem();
 };
 
 #endif	//STARSYSTEM_H

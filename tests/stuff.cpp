@@ -3,6 +3,7 @@
 
 using namespace std;
 
+/*
 uint32_t nLehmer = 0;
 uint32_t Lehmer32() {
 	nLehmer += 0xe120fc15;
@@ -48,4 +49,22 @@ int main() {
 		}
 		cout << endl;
 	}
+} */
+double secSize = 0.3;
+double secLim = 3;
+int nSecX = (secLim / secSize);
+int nSecY = (secLim / secSize);
+int nSecZ = (secLim / secSize);
+
+double toCoord(int i, int nSec) {
+	return (i - nSec/2) * secSize;
+}
+
+int main() {
+	
+	for (int i = 0; i < nSecX; i++)
+		for (int j = 0; j < nSecY; j++)
+			for (int k = 0; k < nSecZ; k++) {
+				cout << toCoord(i, nSecX) << '\t' << toCoord(j, nSecY) << '\t' << toCoord(k, nSecZ * 2) << endl;
+			}
 }

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
+ 
 #include <iostream>
 
 #include "../include/Camera.h"
@@ -13,7 +13,7 @@
 using namespace std;
 
 double secSize = 0.3;
-double secLim = 3;
+double secLim = 5;
 int nSector = (secLim / secSize);
 
 Camera cam(
@@ -43,7 +43,7 @@ Vec3 toCoord(Vec3 ints, Vec3 offset, int nSec, double secSize) {
 	//return (i + offset - nSec / 2) * secSize;
 	double x = (ints.x + offset.x - nSec / 2) * secSize;
 	double y = (ints.y + offset.y - nSec / 2) * secSize;
-	double z = (ints.z + offset.z - nSec / 2) * secSize;
+	double z = (ints.z + offset.z - nSec - 10) * secSize;
 	return Vec3(x, y, z);
 }
 
@@ -80,10 +80,11 @@ void display(void) {
 										 nSector, secSize);
 
 					if (SysSector.starExists) {
+						glColor3f(SysSector.starColor[0], SysSector.starColor[1], SysSector.starColor[2]);
 						Vec3 coords = toCoord(Vec3(i, j, k), cam.offset, nSector, secSize);
 						glPushMatrix();
 						glTranslatef(coords.x, coords.y, coords.z);
-						glutWireCube(secSize);	// setor
+						//glutWireCube(secSize);	// setor
 						glPopMatrix();
 						glPushMatrix();
 						// translate star
@@ -97,6 +98,14 @@ void display(void) {
 				}
 	}
 	glPopMatrix();
+
+    /* Matrix cube
+	Vec3 coords = toCoord(Vec3(0,0,0), cam.offset, nSector, secSize);
+	cout << coords << endl;
+	glPushMatrix();
+	glTranslatef(coords.x, coords.y, coords.z);
+	//glutWireCube(secLim);	// setor
+	glPopMatrix(); */
 
 	glutSwapBuffers();
 }

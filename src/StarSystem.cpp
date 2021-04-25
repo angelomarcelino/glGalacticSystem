@@ -17,8 +17,8 @@ uint32_t StarSystem::Lehmer32() {
 }
 
 StarSystem::StarSystem(uint32_t i, uint32_t j, uint32_t k, double nSec, double secSize) {
-	nLehmer = (k & 0xFFFF) << 16 | (j & 0xFFFF) << 8 | (i & 0xFFFF);
-	//nLehmer = hash<uint32_t>{}(i + (j * 23) + (k * 135));
+	//nLehmer = (k & 0xFFFF) << 16 | (j & 0xFFFF) << 8 | (i & 0xFFFF);
+	nLehmer = hash<uint32_t>{}(i + (j * 23) + (k * 135));
 
 	starExists = (rndInt(0, (int)(nSec * 10)) == 1);
 	if (!starExists) return;
@@ -29,6 +29,26 @@ StarSystem::StarSystem(uint32_t i, uint32_t j, uint32_t k, double nSec, double s
 		int sig = (rndInt(1, 2) == 1) ? 1 : -1;
 		starOffset[i] = sig * rndDouble(0.01, secSize / 8);
 	}
+
+	int kelvin = rndInt(3, 15);
+	if (kelvin < 6) {  // RED - ORANGE
+		starColor[0] = 1.0;
+		starColor[1] = rndInt(0, 150) / 255.0;
+		starColor[2] = 0.0;
+	} else if (kelvin >= 6 && kelvin < 9) {  // ORANGE - YELLOW
+		starColor[0] = 1.0;
+		starColor[1] = rndInt(200, 255) / 255.0;
+		starColor[2] = 0.0;
+	} else if (kelvin >= 9 && kelvin < 12) {	// YELLOW - WHITE
+		starColor[0] = 1.0;
+		starColor[1] = rndInt(150, 255) / 255.0;
+		starColor[2] = rndInt(0, 255) / 255.0;
+	} else if (kelvin >= 12 && kelvin <= 15) {	 // WHITE - BLUE
+		starColor[0] = 0.0;
+		starColor[1] = rndInt(100, 200) / 255.0;
+		starColor[2] = 1.0;
+	}
+	//cout << ' ' << kelvin << ' ' << starColor[0] << ' ' << starColor[1] << ' ' << starColor[2] << endl;
 
 	// Cor da estrela
 	// Numero de planetas (talvez criar classe de planetas)

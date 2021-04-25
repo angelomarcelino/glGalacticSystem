@@ -111,7 +111,10 @@ void Camera::UpdateVectors() {
 
 void Camera::UpdateCenter() {
 	center = pos + front;
-	offset = pos / speed;
+	offset = (center + (front / speed)) / speed;
+	offset.x = (int)offset.x;
+	offset.y = (int)offset.y;
+	offset.z = (int)offset.z;
 	//cout << offset << endl;
 }
 
