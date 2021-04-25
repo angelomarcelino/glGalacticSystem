@@ -12,6 +12,9 @@
 
 class PlanetarySystem {
     private:
+        // Star
+        GLfloat star_color[3];
+
         // Planets
         std::vector<Planet*> planets;
 
@@ -65,7 +68,7 @@ class PlanetarySystem {
         void DrawStarDots();
 
     public:
-        PlanetarySystem(uint32_t _random_seed);
+        PlanetarySystem();
         ~PlanetarySystem();
 
         void Init();
@@ -73,6 +76,9 @@ class PlanetarySystem {
         void Run();
 
         void SelectPlanet(int planet_idx);
+
+        void SetRandSeed(uint32_t _random_seed);
+        void SetStarColor(GLfloat red, GLfloat green, GLfloat blue);
         
         void KeyboardHandler(int key);
         void KeyboardHandler(unsigned char key);

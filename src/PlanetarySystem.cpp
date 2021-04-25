@@ -59,67 +59,24 @@ GLfloat initial_camera_pos[9][3] = {
 };
 
 // Class Constructor
-PlanetarySystem::PlanetarySystem(uint32_t _random_seed) {
+PlanetarySystem::PlanetarySystem() {
 
-    random_seed = _random_seed;
-
-    // Generate a random number of planets
-    int n_planets = RandInt(0, 8);
-
-    // Add star
-    GLfloat *star_color = RndStarColor();
-    GLfloat star_size = RandInt(2, 5); 
-
-    planets.push_back(new Planet(
-        {0.0, 0.0}, {0.0, 0.0}, 
-        0.0, 0.0, 0.0, 
-        RandDouble(1.5, 2.3), 
-        star_color
-    ));
-
-    delete star_color;
-
-    // Add planets with random characteristics
-    if(n_planets > 0) {
-        GLfloat *planet_color = NULL;
-
-        for (int i = 0; i < n_planets; i++) {
-            planet_color = RndColor();
-
-            planets.push_back(new Planet(
-                {0.0, RandSign() * initial_pos_z[i]},
-                {RandSign() * initial_vel_x[i], 0.0},
-                (GLfloat)RandDouble(0.0, 50.0),
-                (GLfloat)RandDouble(0.001, 0.05),
-                masses[i],
-                (GLfloat)RandDouble(i, initial_pos_z[i]),
-                planet_color    
-            ));   
-
-            // 40% possibility of having a moon
-            if((i > 3) and (RandDouble(0.0, 1.0) < 0.4))
-                planets[i]->has_moon = true; 
-        }
-
-        delete planet_color;
-    }
-
-    // Set up planet camera select controls
-    planet_select = new bool[planets.size()]{ false };
-
-    camera = new SysCamera(initial_camera_pos[n_planets]);
-
-    // Background
-    for (int i = 0; i < 100; i++) {
-		bg_dots[i][0] = RandInt(0, RAND_MAX);
-		bg_dots[i][1] = RandInt(0, RAND_MAX);
-	}
 }
 
 // Class Destructor
 PlanetarySystem::~PlanetarySystem() {
     delete[] planet_select;
     delete camera;
+}
+
+void PlanetarySystem::SetRandSeed(uint32_t _random_seed) {
+    random_seed = _random_seed;
+}
+
+void PlanetarySystem::SetStarColor(GLfloat red, GLfloat green, GLfloat blue) {
+    star_color[0] = red;
+    star_color[1] = green;
+    star_color[2] = blue;
 }
 
 uint32_t PlanetarySystem::Lehmer32() {
@@ -166,6 +123,56 @@ GLfloat* PlanetarySystem::RndStarColor() {
 }
 
 void PlanetarySystem::Init() {
+
+    // Generate a random number of planets
+    int n_planets = RandInt(0, 8);
+
+    // Add star
+    GLfloat star_size = RandInt(2, 5); 
+
+    planets.push_back(new Planet(
+        {0.0, 0.0}, {0.0, 0.0}, 
+        0.0, 0.0, 0.0, 
+        RandDouble(1.5, 2.3), 
+        star_color
+    ));
+
+    // Add planets with random characteristics
+    if(n_planets > 0) {
+        GLfloat *planet_color = NULL;
+
+        for (int i = 0; i < n_planets; i++) {
+            planet_color = RndColor();
+
+            planets.push_back(new Planet(
+                {0.0, RandSign() * initial_pos_z[i]},
+                {RandSign() * initial_vel_x[i], 0.0},
+                (GLfloat)RandDouble(0.0, 50.0),
+                (GLfloat)RandDouble(0.001, 0.05),
+                masses[i],
+                (GLfloat)RandDouble(i, initial_pos_z[i]),
+                planet_color    
+            ));   
+
+            // 40% possibility of having a moon
+            if((i > 3) and (RandDouble(0.0, 1.0) < 0.4))
+                planets[i]->has_moon = true; 
+        }
+
+        delete planet_color;
+    }
+
+    // Set up planet camera select controls
+    planet_select = new bool[planets.size()]{ false };
+
+    camera = new SysCamera(initial_camera_pos[n_planets]);
+
+    // Background
+    for (int i = 0; i < 100; i++) {
+		bg_dots[i][0] = RandInt(0, RAND_MAX);
+		bg_dots[i][1] = RandInt(0, RAND_MAX);
+	}
+
     // Enable OpenGL stuff
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glShadeModel(GL_SMOOTH);
