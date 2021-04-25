@@ -3,16 +3,13 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glut.h>
 #include <math.h>
 
 #include <vector>
 
-#include "Sphere.h"
-
 class Planet {
-    private:
-        SolidSphere* sphere;
-        
+    private:        
         const GLdouble grav_const;
         const GLdouble scaleG;
 
@@ -21,7 +18,7 @@ class Planet {
 
         GLdouble x_pos, y_pos, z_pos;
         GLdouble x_pos_G, z_pos_G;
-
+        
         GLdouble mass, radius, angle;
         
         GLdouble grav_accel, x_vel, z_vel;
@@ -30,7 +27,7 @@ class Planet {
         GLfloat theta, rotation_speed;
 
         // Size scaling
-        GLfloat scale;
+        GLfloat size, scale;
 
         // RGB color values
         GLfloat color[3];
@@ -41,14 +38,13 @@ class Planet {
 
         // Orbit line variables
         std::vector<std::pair<GLdouble, GLdouble>> orbit_points;
-        int last_insertion = 0;
-        int orbit_increment = 2;
 
         void GravMath();
         void Render();
-        void SetPosition(GLdouble _x_pos, GLdouble _y_pos, GLdouble _z_pos);
-        void SetColor(GLfloat red, GLfloat green, GLfloat blue);
+        void AxisRotation(GLfloat theta);
         void UpdateMoon(GLdouble x, GLdouble y, GLdouble z);
+        void SetColor(GLfloat red, GLfloat green, GLfloat blue);
+        void SetPosition(GLdouble _x_pos, GLdouble _y_pos, GLdouble _z_pos);
         void DrawOrbit(GLdouble _x_pos, GLdouble _z_pos, bool orbit_toggle);
 
     public:
@@ -56,7 +52,7 @@ class Planet {
             std::pair<GLdouble, GLdouble> initial_pos, 
             std::pair<GLdouble, GLdouble> initial_vel,
             GLfloat tilt, GLfloat _rotation_speed,
-            GLdouble _mass, GLfloat size, GLfloat* _color
+            GLdouble _mass, GLfloat _size, GLfloat* _color
         );
         ~Planet();
 

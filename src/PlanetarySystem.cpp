@@ -11,56 +11,226 @@ GLfloat color_yellow[3]    = {1.0f, 0.8f, 0.0f};
 GLfloat color_orange[3]    = {1.0f, 0.5f, 0.0f};
 GLfloat color_lightblue[3] = {0.0f, 1.0f, 1.0f};
 
+// Stable initial conditions for the planets
+GLdouble initial_pos_z[8] = {
+    0.3870,
+    0.7230,
+    1.0000,
+    1.5200,
+    3.2000,
+    4.5800,
+    6.7500,
+    10.250
+};
+
+GLdouble initial_vel_x[8] = { 
+    0.025,
+    0.068,
+    0.070,
+    0.020,
+    0.130,
+    0.350,
+    0.120,
+    0.195
+};
+
+GLdouble masses[8] = {
+    3.835E6,    
+    5.682E7,    
+    6.972E7,    
+    7.460E6,    
+    7.460E8,    
+    6.637E9,
+    1.011E9,
+    5.192E9     
+};
+
+// Initial camera positions
+GLfloat initial_camera_pos[9][3] = {
+    {15,  12,   9},
+    { 5,   5,   5},
+    { 9,  10,  15},
+    {10,  10,  20},
+    {40,  30,  30},
+    {40,  40,  50},
+    {80,  70,  80},
+    {80,  80, 100},
+    {70, 107, 160}
+};
+
 // Class Constructor
-PlanetarySystem::PlanetarySystem() {
-    planets = {
-        // initial_pos, initial_vel, tilt, _rotation_speed, mass, size, color
-        new Planet({0.0, 0.0}, {0.0, 0.0}, 0.0, 0.0, 0.0, 2.0, color_yellow),
-        new Planet({0.0, 0.387}, {0.025, 0.0}, 0.0, 0.001, 3834600, 0.383, color_purple),
-        new Planet({0.0, 1.0}, {0.07, 0.00}, 30.0, 0.01, 6.972E7, 1.0, color_green),
-        new Planet({0.0, 1.52}, {0.02, 0.0}, 32.1, 0.015, 7460040, 0.832, color_red),
-        new Planet({0.0, 2.2}, {0.05, 0.0}, 4.02, 0.0266, 74600400, 0.9, color_blue)
-    };
+PlanetarySystem::PlanetarySystem(uint32_t _random_seed) {
 
-    // Define moons
-    planets[2]->has_moon = true;
-    planets[4]->has_moon = true;
+    random_seed = _random_seed;
 
-    // Set up planet select controls
+    // Generate a random number of planets
+    int n_planets = RandInt(0, 8);
+
+    // Add star
+    GLfloat *star_color = RndStarColor();
+    GLfloat star_size = RandInt(2, 5); 
+
+    planets.push_back(new Planet(
+        {0.0, 0.0}, {0.0, 0.0}, 
+        0.0, 0.0, 0.0, 
+        RandDouble(1.5, 2.3), 
+        star_color
+    ));
+
+    delete star_color;
+
+    // Add planets with random characteristics
+    if(n_planets > 0) {
+        GLfloat *planet_color = NULL;
+
+        for (int i = 0; i < n_planets; i++) {
+            planet_color = RndColor();
+
+            planets.push_back(new Planet(
+                {0.0, RandSign() * initial_pos_z[i]},
+                {RandSign() * initial_vel_x[i], 0.0},
+                (GLfloat)RandDouble(0.0, 50.0),
+                (GLfloat)RandDouble(0.001, 0.05),
+                masses[i],
+                (GLfloat)RandDouble(i, initial_pos_z[i]),
+                planet_color    
+            ));   
+
+            // 40% possibility of having a moon
+            if((i > 3) and (RandDouble(0.0, 1.0) < 0.4))
+                planets[i]->has_moon = true; 
+        }
+
+        delete planet_color;
+    }
+
+    // Set up planet camera select controls
     planet_select = new bool[planets.size()]{ false };
 
-    camera = new SysCamera;
+    camera = new SysCamera(initial_camera_pos[n_planets]);
 
-    // Enable OpenGL stuff
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_DEPTH_TEST);
-
-    // glColorMaterial(GL_FRONT, GL_AMBIENT);
-    // glEnable(GL_COLOR_MATERIAL);
-    // glEnable(GL_POLYGON_SMOOTH);
+    // Background
+    for (int i = 0; i < 100; i++) {
+		bg_dots[i][0] = RandInt(0, RAND_MAX);
+		bg_dots[i][1] = RandInt(0, RAND_MAX);
+	}
 }
 
 // Class Destructor
 PlanetarySystem::~PlanetarySystem() {
     delete[] planet_select;
+    delete camera;
+}
+
+uint32_t PlanetarySystem::Lehmer32() {
+    random_seed += 0xe120fc15;
+	uint64_t tmp;
+	tmp = (uint64_t)random_seed * 0x4a39b70d;
+	uint32_t m1 = (tmp >> 32) ^ tmp;
+	tmp = (uint64_t)m1 * 0x12fad5c9;
+	uint32_t m2 = (tmp >> 32) ^ tmp;
+
+	return m2;
+}
+
+int PlanetarySystem::RandInt(int min, int max) { 
+    return (Lehmer32() % (max - min)) + min; 
+}
+
+double PlanetarySystem::RandDouble(double min, double max) {
+    return ((double)Lehmer32() / (double)(0x7FFFFFFF)) * (max - min) / 2 + min;
+}
+
+int PlanetarySystem::RandSign() {
+    return RandDouble(0.0, 1.0) < 0.4 ? -1 : 1;
+};
+
+GLfloat* PlanetarySystem::RndColor() {
+    GLfloat *color = new GLfloat[3]{
+        (GLfloat)RandDouble(0.0, 1.0),
+        (GLfloat)RandDouble(0.0, 1.0),
+        (GLfloat)RandDouble(0.0, 1.0)
+    };
+
+    return color;
+}
+
+GLfloat* PlanetarySystem::RndStarColor() {
+    GLfloat *color = new GLfloat[3]{
+        1.0,
+        (GLfloat)RandDouble(0.00, 1.0),
+        (GLfloat)RandDouble(0.35, 1.0)
+    };
+
+    return color;
+}
+
+void PlanetarySystem::Init() {
+    // Enable OpenGL stuff
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
+
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_material);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialf(GL_FRONT, GL_SHININESS, 50.0);
+
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    glColorMaterial(GL_FRONT, GL_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
+}
+
+void PlanetarySystem::DrawStarDots() {
+    // 2D rendering
+    glDisable(GL_LIGHTING);
+
+    int w = glutGet(GLUT_WINDOW_WIDTH);
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+
+	glMatrixMode(GL_PROJECTION);
+	
+    glLoadIdentity();
+	glOrtho(0, w, 0, h, -1, 1);
+	
+    glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glPushMatrix();
+	// Star dots
+    glColor4f(1.0, 1.0, 1.0, 0.4);
+    glPointSize(2);
+    glBegin(GL_POINTS);
+    int x, y;
+    for (int i = 1; i < 100; i++) {
+        x = bg_dots[i][0] % w;
+        y = bg_dots[i][1] % h;
+
+        glVertex2i(x, y);
+    }
+    glEnd();
+	glPopMatrix();
+    glEnable(GL_LIGHTING);
 }
 
 void PlanetarySystem::Run() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+    // DrawStarDots();
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(fov, (float)WIDTH / (float)HEIGHT, near_plane, far_plane);
+    gluPerspective(fov, (GLfloat)WIDTH / (GLfloat)HEIGHT, near_plane, far_plane);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    
+
     if (toggle_wire_frame) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     } else {
@@ -78,9 +248,9 @@ void PlanetarySystem::Run() {
     for (auto planet : planets) {
 
         if (planet->GetMass() == 0.0) {
-            // glDisable(GL_LIGHTING);
+            glDisable(GL_LIGHTING);
             planet->Update(toggle_gravity, keys_state["d"]);
-            // glEnable(GL_LIGHTING);        
+            glEnable(GL_LIGHTING);        
         }
 
         planet->Update(toggle_gravity, keys_state["d"]);
@@ -88,6 +258,7 @@ void PlanetarySystem::Run() {
 
     // Toggle the display of the world's coordinates axis
     if (keys_state["s"]) {
+        glDisable(GL_LIGHTING);
         glBegin(GL_LINES);
         glColor3f(1.0, 0.0, 0.0);
         glVertex3f(-50.0, 0.0, 0.0);
@@ -101,6 +272,7 @@ void PlanetarySystem::Run() {
         glVertex3f(0.0, 0.0, -50.0);
         glVertex3f(0.0, 0.0, 50.0); // Blue is Z
         glEnd();
+        glEnable(GL_LIGHTING);
     }
 
     glutSwapBuffers();
@@ -153,12 +325,10 @@ void PlanetarySystem::KeyboardHandler(unsigned char key) {
 
         case 'w':
             toggle_wire_frame = !toggle_wire_frame;
-            glutPostRedisplay();
             break;
 
         case 'g':
             toggle_gravity = !toggle_gravity;
-            glutPostRedisplay();
             break;
 
         case 'q':
