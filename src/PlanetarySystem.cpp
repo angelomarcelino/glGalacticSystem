@@ -198,45 +198,45 @@ void PlanetarySystem::DrawStarDots() {
     int w = glutGet(GLUT_WINDOW_WIDTH);
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
 
+	// 2D rendering
+	glDisable(GL_DEPTH_TEST);
 	glMatrixMode(GL_PROJECTION);
-	
-    glLoadIdentity();
+	glLoadIdentity();
 	glOrtho(0, w, 0, h, -1, 1);
-	
-    glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	glPushMatrix();
-	// Star dots
-    glColor4f(1.0, 1.0, 1.0, 0.4);
-    glPointSize(2);
-    glBegin(GL_POINTS);
-    int x, y;
-    for (int i = 1; i < 100; i++) {
-        x = bg_dots[i][0] % w;
-        y = bg_dots[i][1] % h;
-
-        glVertex2i(x, y);
-    }
-    glEnd();
-	glPopMatrix();
-    glEnable(GL_LIGHTING);
+	{  // Star dots
+		glColor3f(1.0, 1.0, 1.0);
+		glPointSize(3);
+		glBegin(GL_POINTS);
+		for (int i = 1; i < 100; i++) {
+			int x = bg_dots[i][0] % w;
+			int y = bg_dots[i][1] % h;
+			glVertex2i(x, y);
+		}
+		glEnd();
+	}
+	glEnable(GL_LIGHTING);
 }
 
 void PlanetarySystem::Run() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    //glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-    // DrawStarDots();
-    
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+    DrawStarDots();
 
-    gluPerspective(fov, (GLfloat)WIDTH / (GLfloat)HEIGHT, near_plane, far_plane);
+	// 3D rendering
+	glEnable(GL_DEPTH_TEST);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+	gluPerspective(fov, (GLfloat)WIDTH / (GLfloat)HEIGHT, near_plane, far_plane);
+
+    //glMatrixMode(GL_MODELVIEW); //Dá ruim se descomentar
+    //glLoadIdentity();
 
     if (toggle_wire_frame) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -279,10 +279,10 @@ void PlanetarySystem::Run() {
         glVertex3f(0.0, 0.0, -50.0);
         glVertex3f(0.0, 0.0, 50.0); // Blue is Z
         glEnd();
-        glEnable(GL_LIGHTING);
-    }
+		glEnable(GL_LIGHTING);
+	}
 
-    glutSwapBuffers();
+	glutSwapBuffers();
 }
 
 void PlanetarySystem::SelectPlanet(int planet_idx) {

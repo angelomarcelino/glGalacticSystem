@@ -9,10 +9,12 @@ include_directories( ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )
 
 set(HEADERS
     include/StarSystem.h
+    include/Camera.h 
 )
 
 set(SOURCES
     src/StarSystem.cpp
+    src/Camera.cpp
 )
 
 set(PLANETARY_SYS_HEADERS
@@ -29,6 +31,8 @@ set(PLANETARY_SYS_SOURCES
     src/Sphere.cpp
 )
 
+add_executable(main src/main.cpp ${HEADERS} ${SOURCES})
+target_link_libraries(main ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
 
 add_executable(sys_view tests/SysView.cpp)
 target_link_libraries(sys_view ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
