@@ -16,6 +16,8 @@ double secSize = 0.3;
 double secLim = 5;
 int nSector = (secLim / secSize);
 
+static int dots[100][2];
+
 Camera cam(
 	new Vec3(0.0, 0.0, 3.0),  // Eye
 	new Vec3(0.0, 0.0, 0.0),  // Center
@@ -23,11 +25,12 @@ Camera cam(
 	secSize					  // Movement Speed
 );
 
-Vec3 toCoord(Vec3 ints, Vec3 offset, int nSec, double secSize) {
+Vec3 toCoord(Vec3 ints, Vec3 offset, Vec3 nSec, double secSize) {
 	//return (i + offset - nSec / 2) * secSize;
-	double x = (ints.x + offset.x - nSec / 2) * secSize;
-	double y = (ints.y + offset.y - nSec / 2) * secSize;
-	double z = (ints.z + offset.z - nSec - 10) * secSize;
+	double x = (ints.x + offset.x - nSec.x / 2 - 7) * secSize;
+	double y = (ints.y + offset.y - nSec.y / 2 - 7) * secSize;
+	double z = (ints.z + offset.z - nSec.z - 10) * secSize;
+	
 	return Vec3(x, y, z);
 }
 
@@ -48,17 +51,21 @@ void drawAxis(int l) {
 }
 
 void drawStars(GLenum mode) {
-	for (int i = 0; i < nSector; i++)
-		for (int j = 0; j < nSector; j++)
-			for (int k = 0; k < nSector * 2; k++) {
+	int i, j, k;
+	for ( i = 0; i < nSector*2; i++)
+		for ( j = 0; j < nSector*2; j++)
+			for ( k = 0; k < nSector*2; k++) {
 				StarSystem SysSector(i + (uint32_t)cam.offset.x,
 									 j + (uint32_t)cam.offset.y,
 									 k + (uint32_t)cam.offset.z,
 									 nSector, secSize);
 
 				if (SysSector.starExists) {
-					glColor3f(SysSector.starColor[0], SysSector.starColor[1], SysSector.starColor[2]);
-					Vec3 coords = toCoord(Vec3(i, j, k), cam.offset, nSector, secSize);
+					Vec3 nSec = Vec3(nSector, nSector, nSector);
+					glColor3f(SysSector.starColor.x,
+							  SysSector.starColor.y,
+							  SysSector.starColor.z);
+					Vec3 coords = toCoord(Vec3(i, j, k), cam.offset, nSec, secSize);
 					glPushMatrix();
 					glTranslatef(coords.x, coords.y, coords.z);
 					//glutWireCube(secSize);	// setor
@@ -80,6 +87,8 @@ void drawStars(GLenum mode) {
 void init(void) {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glShadeModel(GL_SMOOTH);
+
+	glEnable(GL_DEPTH_TEST);
 }
 
 void display(void) {
@@ -88,12 +97,39 @@ void display(void) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// 2D rendering
+	glDisable(GL_DEPTH_TEST);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, w, 0, h, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glPushMatrix();
+	{  // Star dots
+		glColor3f(1.0, 1.0, 1.0);
+		glPointSize(3);
+		glBegin(GL_POINTS);
+		for (int i = 1; i < 100; i++) {
+			int x = dots[i][0] % w;
+			int y = dots[i][1] % h;
+			glVertex2i(x, y);
+		}
+		glEnd();
+	}
+	glPopMatrix();
+
 	// 3D rendering
+	glEnable(GL_DEPTH_TEST);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.5, 200.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(cam.pos.x, cam.pos.y, cam.pos.z,
 			  cam.center.x, cam.center.y, cam.center.z,
 			  cam.up.x, cam.up.y, cam.up.z);
+	
 
 	drawAxis(3.0);
 
@@ -158,22 +194,32 @@ void processHits(GLint hits, GLuint buffer[]) {
 	unsigned int i, j;
 	GLuint names, *ptr;
 
-	printf("hits = %d\n", hits);
+	float zlow = 10000000;
+	uint32_t name;
+
 	ptr = (GLuint *)buffer;
 	for (i = 0; i < hits; i++) { /* for each hit  */
-		names = *ptr;
-		printf(" number of names for hit = %d\n", names);
-		ptr++;
-		printf("  z1 is %g;", (float)*ptr / 0x7fffffff);
-		ptr++;
-		printf(" z2 is %g\n", (float)*ptr / 0x7fffffff);
-		ptr++;
-		printf("   the name is ");
-		for (j = 0; j < names; j++) { /* for each name */
-			cout << *ptr;
-			ptr++;
+								 //names = *ptr;
+		ptr++;					 //z1
+		float z1 = (float)*ptr / 0x7fffffff;
+		zlow = z1 < zlow ? z1 : zlow;
+		ptr++;	//z2
+		float z2 = (float)*ptr / 0x7fffffff;
+		zlow = z2 < zlow ? z2 : zlow;
+		ptr++;	//comeco dos nome (mas so tem 1)
+		if (zlow == z1 || zlow == z2) {
+			name = (uint32_t)*ptr;
 		}
-		printf("\n");
+		ptr++;	// proximo hit
+	}
+
+	if (hits > 0) {
+		StarSystem sector(name, nSector, secSize);
+		char execB[100];
+		sprintf(execB, "build/planetary_sys %u %f %f %f", sector.getLehmer() + 135,
+				sector.starColor.x, sector.starColor.y, sector.starColor.z);
+		cout << execB << endl;
+		system(execB);
 	}
 }
 
@@ -203,6 +249,11 @@ void onMouse(int button, int state, int x, int y) {
 	gluPickMatrix((GLdouble)x, (GLdouble)(viewport[3] - y),
 				  5.0, 5.0, viewport);
 	gluPerspective(60.0, (GLfloat)w / (GLfloat)h, 0.5, 200.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(cam.pos.x, cam.pos.y, cam.pos.z,
+			  cam.center.x, cam.center.y, cam.center.z,
+			  cam.up.x, cam.up.y, cam.up.z);
 	drawStars(GL_SELECT);
 	glPopMatrix();
 	glFlush();
@@ -212,10 +263,14 @@ void onMouse(int button, int state, int x, int y) {
 }
 
 int main(int argc, char **argv) {
+	for (int i = 0; i < 100; i++) {
+		dots[i][0] = rand();
+		dots[i][1] = rand();
+	}
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(720, 640);
-	glutInitWindowPosition(500, 200);
+	glutInitWindowSize(1080, 720);
+	glutInitWindowPosition(200, 100);
 	glutCreateWindow(argv[0]);
 	init();
 	glutDisplayFunc(display);

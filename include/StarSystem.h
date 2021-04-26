@@ -5,12 +5,14 @@
 #include <GL/glu.h>
 
 #include <iostream>
+#include "../include/Camera.h"
 using namespace std;
 
 
 class StarSystem {
    private:
 	uint32_t nLehmer = 0;
+	uint32_t iniLehmer = 0;
 	//uint32_t nLehmerOld = 0;
 	uint32_t Lehmer32();
 
@@ -25,11 +27,12 @@ class StarSystem {
 	double starRadius = 0.0;
 	//double starCoord[3] = {0.0, 0.0, 0.0};
 	double starOffset[3] = {0.0, 0.0, 0.0};
-	float starColor[3] = {0.0, 0.0, 0.0};
+	Vec3 starColor = Vec3(0.0,0.0,0.0);
 
 	StarSystem(uint32_t i, uint32_t j, uint32_t k, double nSec, double secSize);
+	StarSystem(uint32_t lehmer, double nSec, double secSize);
 	//~StarSystem();
-	uint32_t getLehmer() { return nLehmer; }
+	uint32_t getLehmer() { return iniLehmer; }
 };
 
 #endif	//STARSYSTEM_H

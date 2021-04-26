@@ -29,8 +29,6 @@ set(PLANETARY_SYS_SOURCES
     src/Sphere.cpp
 )
 
-add_executable(main src/main.cpp ${HEADERS} ${SOURCES})
-target_link_libraries(main ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
 
 add_executable(sys_view tests/SysView.cpp)
 target_link_libraries(sys_view ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} )
