@@ -34,7 +34,7 @@ Vec3 toCoord(Vec3 ints, Vec3 offset, Vec3 nSec, double secSize) {
 	return Vec3(x, y, z);
 }
 
-void drawAxis(int l) {
+void drawAxis(GLfloat l) {
 	glBegin(GL_LINES);
 	glColor3f(1.0, 1.0, 1.0);
 	glVertex3f(-l, 0.0, 0.0);
@@ -66,10 +66,10 @@ void drawStars(GLenum mode) {
 							  SysSector.starColor.y,
 							  SysSector.starColor.z);
 					Vec3 coords = toCoord(Vec3(i, j, k), cam.offset, nSec, secSize);
-					glPushMatrix();
-					glTranslatef(coords.x, coords.y, coords.z);
+					//glPushMatrix();
+					//glTranslatef(coords.x, coords.y, coords.z);
 					//glutWireCube(secSize);	// setor
-					glPopMatrix();
+					//glPopMatrix();
 					glPushMatrix();
 					// translate star
 					if (mode == GL_SELECT)
@@ -130,9 +130,9 @@ void display(void) {
 			  cam.center.x, cam.center.y, cam.center.z,
 			  cam.up.x, cam.up.y, cam.up.z);
 
-	drawAxis(3.0);
+	//drawAxis(0.3);
 
-	glColor3f(1.0, 1.0, 0.0);
+	//glColor3f(1.0, 1.0, 0.0);
 	glPushMatrix();
 	{  // Procedural stars
 		drawStars(GL_RENDER);
@@ -215,7 +215,7 @@ void processHits(GLint hits, GLuint buffer[]) {
 	if (hits > 0) {
 		StarSystem sector(name, nSector, secSize);
 		char execB[100];
-		sprintf(execB, "/home/pudimi/Documents/Projects/glGalaticSystem/build/planetary_sys %u %f %f %f", sector.getLehmer() + 135,
+		sprintf(execB, "build/planetary_sys %u %f %f %f", sector.getLehmer() + 135,
 				sector.starColor.x, sector.starColor.y, sector.starColor.z);
 		cout << execB << endl;
 		system(execB);

@@ -18,7 +18,7 @@ uint32_t StarSystem::Lehmer32() {
 
 StarSystem::StarSystem(uint32_t i, uint32_t j, uint32_t k, double nSec, double secSize) {
 	//nLehmer = (k & 0xFFFF) << 16 | (j & 0xFFFF) << 8 | (i & 0xFFFF);
-	nLehmer = hash<uint32_t>{}(i + (j * 23) + (k * 135));
+	nLehmer = hash<uint32_t>{}(i + (j * 10) + (k * 100));
 	iniLehmer = nLehmer;
 	starExists = (rndInt(0, (int)(nSec * 10)) == 1);
 	if (!starExists) return;
